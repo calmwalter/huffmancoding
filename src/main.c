@@ -330,16 +330,21 @@ int main(int argc, char *argv[])
     ///get string
     char new_str[256];
     read_content_from_file(new_str,"ToBeTra.txt");
+
     //encoding
     char new_code[1024];
     encoding_string(new_nodes, x, new_str, new_code);
     write_content_to_file(new_code, "CodeFile.txt");
+
     //read code from file
     char codes[1024];
     read_content_from_file(codes,"CodeFile.txt");
+
     //put decoded content to file
     char strs[256];
     decoding(new_nodes, x, codes, strs);
     write_content_to_file(strs, "Textfile.txt");
+
+
     return 0;
 }

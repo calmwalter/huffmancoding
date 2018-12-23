@@ -37,7 +37,7 @@ int huffman(node *nodes, int size, node *tr, int tr_size)
     nodes[y].parent=size;
     nodes[size].pos = size;
     nodes[size].freq = nodes[x].freq + nodes[y].freq;
-    nodes[size].c='\0';
+    nodes[size].c=' ';
     node new_tr[tr_size];
     int cnt = 0;
     for (int i = 0; i < tr_size; i++)
@@ -118,17 +118,17 @@ int count_char(char *str,node *nodes){
     int cnt=0;
     for(int i=0;i<l;i++){
         int flag=0;
-        for(int k=0;k<cnt;k++){
+        for(int k=0;k<=cnt;k++){
             if(nodes[k].c==str[i]){
                 flag=1;
-                nodes[i].freq+=1;
+                nodes[k].freq+=1.0;
                 break;
             }
         }
         //if the char is not in nodes, then create the node
         if(flag==0){
             nodes[cnt].c=str[i];
-            nodes[cnt].freq=1;
+            nodes[cnt].freq=1.0;
             nodes[cnt].left=-1;
             nodes[cnt].right=-1;
             nodes[cnt].parent=-1;
@@ -137,6 +137,78 @@ int count_char(char *str,node *nodes){
         }
     }
     return cnt;
+}
+void print_nodes(node nodes[256],int size){
+    printf("%-8s%-8s%-8s%-8s%-8s%-8s\n","node","freq","left","right","parent","char");
+    for (int i = 0; i < size; i++){
+        printf("node%-4d%-8.2lf", i, nodes[i].freq);
+        if (nodes[i].left != -1)
+            printf("%-8d", nodes[i].left);
+        else
+            printf("%-8s", "NULL");
+        if (nodes[i].right != -1)
+            printf("%-8d", nodes[i].right);
+        else
+            printf("%-8s", "NULL");
+        if (nodes[i].parent != -1)
+            printf("%-8d", nodes[i].parent);
+        else
+            printf("%-8s", "NULL");
+        printf("%c",nodes[i].c);
+        printf("\n");
+    }
+}
+
+void write_huffman_to_file(node nodes[256],int size){
+    FILE *wf=fopen("hfmTree.txt","w");
+    for (int i = 0; i < size; i++){
+        fprintf(wf,"%lf ", nodes[i].freq);
+        fprintf(wf,"%d ", nodes[i].left);
+        fprintf(wf,"%d ", nodes[i].right);
+        fprintf(wf,"%d ", nodes[i].parent);
+        if(nodes[i].left==-1 && nodes[i].right==-1){
+            fprintf(wf,"%c",nodes[i].c);
+        }
+        fprintf(wf,"\n");
+    }
+    fclose (wf);
+}
+int read_huffman_from_file(node nodes[256]){
+    FILE *wf=fopen("hfmTree.txt","r");
+    int i=0;
+    while(fscanf(wf,"%lf", &nodes[i].freq)!=EOF)
+    {
+        fscanf(wf,"%d", &nodes[i].left);
+        fscanf(wf,"%d", &nodes[i].right);
+        fscanf(wf,"%d", &nodes[i].parent);
+        if(nodes[i].left==-1 && nodes[i].right==-1){
+            fgetc (wf);
+            nodes[i].c=fgetc (wf);
+        }
+        else{
+            nodes[i].c=' ';
+        }
+        i++;
+    }
+    fclose(wf);
+    return i;
+}
+void read_content_from_file(char *str,char *filename){
+    FILE *fr=fopen(filename,"r");
+    int i=0;
+    while((str[i]=fgetc(fr))!=EOF){
+        i++;
+    }
+    str[i]='\0';
+    fclose(fr);
+}
+void write_content_to_file(char *str,char* filename){
+    int l=strlen(str);
+    FILE *fw=fopen(filename,"w");
+    for(int i=0;i<l;i++){
+        fputc(str[i],fw);
+    }
+    fclose(fw);
 }
 int main(int argc, char *argv[])
 {
@@ -197,18 +269,77 @@ int main(int argc, char *argv[])
 
 //////////////////////test the second requirement///////////////////////////////
     //test the second requirement
-    char content[256]="THIS PROGRAME IS MY FAVORITE";
-    node nodes[256];
-    int size=count_char(content, nodes);
-    size=huffman (nodes, size, nodes, size);
-    char code[256];
-    encoding_string (nodes, size, content, code);
-    printf("%s\n",code);
-    char str[256];
-    decoding (nodes, size, code, str);
-    printf("%s\n",str);
+    /* char content[1024]="THIS PROGRAME IS MY FAVORITE"; */
+    /* node nodes[1024]; */
+    /* int size=count_char(content, nodes); */
+    /* size=huffman (nodes, size, nodes, size); */
+    /* char code[1024]; */
+    /* encoding_string (nodes, size, content, code); */
+    /* printf("%s\n",code); */
+    /* char str[1024]; */
+    /* decoding (nodes, size, code, str); */
+    /* printf("%s\n",str); */
 ////////////////////////////////////////////////////////////////////////////////
 
 
+///////////////////////////////UI IN COMMAND LINE///////////////////////////////
+    int size;
+    printf("input the size of the characters(n):");
+    scanf("%d",&size);
+    int cnt=0;
+    node nodes[256];
+    // ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    printf("please input n characters:");
+    getchar();
+    while(cnt<size){
+        nodes[cnt].c=getchar();
+        nodes[cnt].left=-1;
+        nodes[cnt].right=-1;
+        nodes[cnt].parent=-1;
+        nodes[cnt].pos=cnt;
+        cnt++;
+    }
+    cnt=0;
+
+    //186 64 13 22 32 103 21 15 47 57 1 5 32 20 57 63 15 1 48 51 80 23 8 18 1 16 1
+    printf("please input n weight of the characters:");
+    while(cnt<size){
+        scanf("%lf",&nodes[cnt].freq);
+        cnt++;
+    }
+    //build huffman tree
+    size=huffman(nodes,size,nodes,size);
+    //write huffman tree to file
+    write_huffman_to_file(nodes,size);
+    char code[1024];
+    char content[1024]="THIS PROGRAME IS MY FAVORITE";
+    encoding_string (nodes, size, content, code);
+    printf("%s\n",code);
+    char str[1024];
+    decoding (nodes, size, code, str);
+    printf("%s\n",str);
+
+    print_nodes(nodes,size);
+
+
+    node new_nodes[256];
+    int x=read_huffman_from_file (new_nodes);
+    //printf("\nx=%d\n",x);
+    //print_nodes (new_nodes, x);
+
+    ///get string
+    char new_str[256];
+    read_content_from_file(new_str,"ToBeTra.txt");
+    //encoding
+    char new_code[1024];
+    encoding_string(new_nodes, x, new_str, new_code);
+    write_content_to_file(new_code, "CodeFile.txt");
+    //read code from file
+    char codes[1024];
+    read_content_from_file(codes,"CodeFile.txt");
+    //put decoded content to file
+    char strs[256];
+    decoding(new_nodes, x, codes, strs);
+    write_content_to_file(strs, "Textfile.txt");
     return 0;
 }

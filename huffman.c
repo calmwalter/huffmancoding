@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef linux
 #include<unistd.h>
+#endif
+#ifdef _WIN32
+#include<windows.h>
+#endif
 typedef struct node
 {
   char c;
@@ -14,7 +19,6 @@ typedef struct node
 
 int huffman(node *nodes, int size, node *tr, int tr_size)
 {
-
   if (tr_size < 2)
     return size;
   int x, y;
@@ -53,6 +57,7 @@ int huffman(node *nodes, int size, node *tr, int tr_size)
   int new_size=huffman(nodes, size + 1, new_tr, tr_size - 1);
   return new_size;
 }
+
 int findpos(node *nodes,int size,char c){
   for(int i=0;i<size;i++){
     if(nodes[i].c=='\0'){
@@ -64,6 +69,7 @@ int findpos(node *nodes,int size,char c){
   }
   return -1;
 }
+
 void encoding_char(node *nodes,int size,char c,char *code){
   int pos=findpos(nodes,size,c);
   if(pos>=size)
@@ -90,6 +96,7 @@ void encoding_char(node *nodes,int size,char c,char *code){
     *(code+l-1-i)=tmp;
   }
 }
+
 void encoding_string(node *nodes,int size,char *str,char *code){
   char tmp[256];
   strcpy(code,"");
@@ -99,6 +106,7 @@ void encoding_string(node *nodes,int size,char *str,char *code){
     strcat(code,tmp);
   }
 }
+
 void decoding(node *nodes,int size,char *code,char *str){
   int l=strlen(code)+1;
   int pos=size-1;
@@ -119,6 +127,7 @@ void decoding(node *nodes,int size,char *code,char *str){
   }
   str[cnt]='\0';
 }
+
 int count_char(char *str,node *nodes){
   int l=strlen(str);
   int cnt=0;
@@ -144,6 +153,7 @@ int count_char(char *str,node *nodes){
   }
   return cnt;
 }
+
 void print_nodes(node nodes[256],int size){
   printf("%-8s%-8s%-8s%-8s%-8s%-8s\n","node","freq","left","right","parent","char");
   for (int i = 0; i < size; i++){

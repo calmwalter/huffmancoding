@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include<windows.h>
 #endif
+//node for huffman tree
 typedef struct node
 {
   char c;
@@ -16,7 +17,7 @@ typedef struct node
   int parent;
   int pos;
 } node;
-
+//build huffman tree
 int huffman(node *nodes, int size, node *tr, int tr_size)
 {
   if (tr_size < 2)
@@ -54,10 +55,10 @@ int huffman(node *nodes, int size, node *tr, int tr_size)
     if (tr[i].pos != x && tr[i].pos != y)
       new_tr[cnt++] = tr[i];
   new_tr[tr_size - 2] = nodes[size];
-  int new_size=huffman(nodes, size + 1, new_tr, tr_size - 1);
+  int new_size=huffman(nodes, size + 1, new_tr, tr_size - 1);//recursive
   return new_size;
 }
-
+//find the position of a char
 int findpos(node *nodes,int size,char c){
   for(int i=0;i<size;i++){
     if(nodes[i].c=='\0'){
@@ -69,7 +70,7 @@ int findpos(node *nodes,int size,char c){
   }
   return -1;
 }
-
+//encoding the char
 void encoding_char(node *nodes,int size,char c,char *code){
   int pos=findpos(nodes,size,c);
   if(pos>=size)
@@ -96,7 +97,7 @@ void encoding_char(node *nodes,int size,char c,char *code){
     *(code+l-1-i)=tmp;
   }
 }
-
+//encoding the string
 void encoding_string(node *nodes,int size,char *str,char *code){
   char tmp[256];
   strcpy(code,"");
@@ -106,28 +107,31 @@ void encoding_string(node *nodes,int size,char *str,char *code){
     strcat(code,tmp);
   }
 }
-
+//decoding the string
 void decoding(node *nodes,int size,char *code,char *str){
   int l=strlen(code)+1;
   int pos=size-1;
   int cnt=0;
   strcpy(str,"");
   for(int i=0;i<l;i++){
+    //find the leave node
     if(nodes[pos].left==-1 && nodes[pos].right==-1){
       str[cnt]=nodes[pos].c;
       pos=size-1;
       cnt++;
     }
+    //if code is zero, go left
     if(code[i]=='0'){
       pos=nodes[pos].left;
     }
+    //else if code is 1, go right
     else if(code[i]=='1'){
       pos=nodes[pos].right;
     }
   }
   str[cnt]='\0';
 }
-
+//count the frequence of every char
 int count_char(char *str,node *nodes){
   int l=strlen(str);
   int cnt=0;
@@ -153,7 +157,7 @@ int count_char(char *str,node *nodes){
   }
   return cnt;
 }
-
+//print the node to display the huffman tree's structure
 void print_nodes(node nodes[256],int size){
   printf("%-8s%-8s%-8s%-8s%-8s%-8s\n","node","freq","left","right","parent","char");
   for (int i = 0; i < size; i++){
@@ -174,7 +178,7 @@ void print_nodes(node nodes[256],int size){
     printf("\n");
   }
 }
-
+//write huffman tree to file
 void write_huffman_to_file(node nodes[256],int size){
   FILE *wf=fopen("hfmTree.txt","w");
   for (int i = 0; i < size; i++){
@@ -189,6 +193,7 @@ void write_huffman_to_file(node nodes[256],int size){
   }
   fclose (wf);
 }
+//read huffman tree from file
 int read_huffman_from_file(node nodes[256]){
   FILE *wf=fopen("hfmTree.txt","r");
   int i=0;
@@ -209,6 +214,7 @@ int read_huffman_from_file(node nodes[256]){
   fclose(wf);
   return i;
 }
+//read content from file------any content can be read
 void read_content_from_file(char *str,char *filename){
   FILE *fr=fopen(filename,"r");
   int i=0;
@@ -218,6 +224,7 @@ void read_content_from_file(char *str,char *filename){
   str[i]='\0';
   fclose(fr);
 }
+//write content to file
 void write_content_to_file(char *str,char* filename){
   int l=strlen(str);
   FILE *fw=fopen(filename,"w");
@@ -362,6 +369,12 @@ int main(int argc, char *argv[])
   char strs[256];
   decoding(new_nodes, x, codes, strs);
   write_content_to_file(strs, "Textfile.txt");
+  ////////////US PYTHON TO DISPLAY HUFFMAN TREE GRAPHICALY////////////////////
+#ifdef linux
   system("python3 tree.py");
+#endif
+#ifdef _WIN32
+  system(python "tree.py");
+#endif
   return 0;
 }

@@ -17,10 +17,11 @@ for line in op:
 #############BIG GRAPH##################
 window=Tk()
 height=1000
-width=10000
+width=2000
 xscrollbar = Scrollbar(window,orient=HORIZONTAL)
 yscrollbar = Scrollbar(window)
-canvas=Canvas(window,width=1920,height=1080,xscrollcommand=xscrollbar.set,yscrollcommand=yscrollbar.set)
+canvas=Canvas(window,width=1920,height=1080,xscrollcommand
+              =xscrollbar.set,yscrollcommand=yscrollbar.set)
 xscrollbar.config(command=canvas.xview)
 xscrollbar.pack(side=BOTTOM, fill=X)
 yscrollbar.config(command=canvas.yview)
